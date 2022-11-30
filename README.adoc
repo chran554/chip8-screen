@@ -1,0 +1,36 @@
+= CHIP-8 screen
+
+A generic UI for CHIP-8 implementations.
+
+This is an attempt to create a generic UI for peripherals for CHIP-8 implementations.
+Most CHIP-8 implementations are pretty much straight forward but 
+they all face the problems that occur when it's time to deliver 
+
+* a monitor/screen interface
+* sound 
+* key presses (preferably multiple at the same time)
+
+This project aim to solve those problems and to have a loose coupled interface (UDP multicast) for comunication.
+
+== Limitations 
+
+* Advanced sound, other than continous beeps of some length is not supported. 1bit "sound sample" playback is not supported.
+
+== Prerequisites
+
+* Java is needed to (compile and) run the aplication
+
+== Comunication interface
+
+To be able to comunicate with this CHIP-8 screen you need three things in your CHIP-8 emulator.
+
+1. A way to encode your data in msgpack format. MsgPack is a way to package structured data, much like textual JSON and yaml, but in a binary and much more efficient form.
+2. A way to send UDP mulicast messages (to send screen memory and sound state on/off)
+3. A way to receive UDP multicast messages (to receive key presses)
+
+=== Encode data in msg pack format
+
+=== Send UDP
+
+=== Receive UDP
+
