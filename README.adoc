@@ -2,6 +2,9 @@
 
 A generic UI for CHIP-8 implementations.
 
+.CHIP-8 UI - Brix game
+image::documentation/images/chip8-screen-brix.png[CHIP-8 UI - Brix game]
+
 This is an attempt to create a generic UI for peripherals for CHIP-8 implementations.
 Most CHIP-8 implementations are pretty much straight forward but 
 they all face the problems that occur when it's time to deliver 
@@ -10,11 +13,11 @@ they all face the problems that occur when it's time to deliver
 * sound 
 * key presses (preferably multiple at the same time)
 
-This project aim to solve those problems and to have a loose coupled interface (UDP multicast) for comunication.
+This project aim to solve those problems and to have a loose coupled interface (UDP multicast) for communication.
 
 == Limitations 
 
-* Advanced sound, other than continous beeps of some length is not supported. 1bit "sound sample" playback is not supported.
+* Advanced sound, other than continuous beeps of some length is not supported. 1bit "sound sample" playback is not supported.
 
 == Prerequisites
 
@@ -22,7 +25,7 @@ This project aim to solve those problems and to have a loose coupled interface (
 
 == Comunication interface
 
-To be able to comunicate with this CHIP-8 screen you need three things in your CHIP-8 emulator.
+To be able to communicate with this CHIP-8 screen you need three things in your CHIP-8 emulator.
 
 1. A way to encode your data in msgpack format. MsgPack is a way to package structured data, much like textual JSON and yaml, but in a binary and much more efficient form.
 2. A way to send UDP mulicast messages (to send screen memory and sound state on/off)
@@ -30,7 +33,49 @@ To be able to comunicate with this CHIP-8 screen you need three things in your C
 
 === Encode data in msg pack format
 
+The chip-8 state message sent to this application should be encoded with MsgPack and be on the format.
+
+The struct to be sent should be encoded like:
+
+.Data structure to encode in language Golang (Go)
+[source, go]
+----
+type Chip8StateMessage struct {
+	Sound        bool   `msgpack:"sound"`
+	Keys         uint16 `msgpack:"keys"`
+	Screen       []byte `msgpack:"screen"`
+	ScreenWidth  byte   `msgpack:"screenWidth"`
+	ScreenHeight byte   `msgpack:"screenHeight"`
+}
+----
+
+.Data structure to encode in language Rust
+[source, rust]
+----
+#[allow(non_snake_case)]
+#[derive(Serialize)]
+struct Chip8StateMessage {
+    sound: bool,
+    keys: u16,
+    screen: Vec<u8>,
+    screenWidth: u8,
+    screenHeight: u8,
+}
+----
+
+Explanation:
+
+* _sound_ - is a boolean value for sound either on or off. Any change in sound state of the chip-8 machine must be sent to the screen application. There is no problem to resend the same sound state on several consecutive occasions.
+* _keys_ - is a 16 bit long integer where each bit represents a pressed key on the chip-8 keyboard. The chip-8 keyboard has 16 keys, `0`..`9`,`A`..`F`. The least significant bit represents key `0` and the most significant bit represents key `F`.
+* _screen_ - is a (64*32=) 2048 bit array. Represented by a 256 byte array. The most significant bit of byte index 0 is the top left pixel at screen coordinate (0, 0) and the least significant bit of byte index 255 is the bottom right pixel at screen coordinate (63, 31).
+* _screen width_ - is always set to `64`
+* _screen height_ - is always set to `32`
+
+NOTE: Some implementations of MsgPack can use different encoding schemes of "struct" like data types. The MsgPack encoding scheme should be set to "map type" for the data structure, not "array type".
+
 === Send UDP
+
+
 
 === Receive UDP
 
