@@ -5,12 +5,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 public class ScreenFrame extends JFrame {
 
     private static ScreenFrame singleton = null;
 
-    private JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    private final JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
     private BufferedImage image = null;
     private BufferedImage doubleBufferImage;
@@ -28,32 +29,22 @@ public class ScreenFrame extends JFrame {
     private int keyState = 0x0000;
     private boolean soundState = false;
 
-    private int width = 64;
-    private int height = 32;
+    private final int width = 64;
+    private final int height = 32;
+    private Configuration configuration;
 
     private ScreenFrame() {
         super("CHIP-8");
-        initUI();
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        initialize(64, 32);
-        pack();
     }
 
     public static ScreenFrame getOrCreateSingleton() {
         if (singleton == null) {
             singleton = new ScreenFrame();
-            singleton.setVisible(true);
-            singleton.centerFrame();
-            singleton.addKeyListener(new KeyPad());
         }
 
         return singleton;
     }
 
-    protected void initUI() {
-        add(scrollPane);
-    }
 
     public BufferedImage getImage() {
         return image;
@@ -71,8 +62,9 @@ public class ScreenFrame extends JFrame {
 
 
     public synchronized void setChip8ScreenData(byte[] imageBitData) {
-        final int pixelOn = new Color(0x33, 0x99, 0x00, 0xFF).getRGB();
-        final int pixelOff = new Color(0x33, 0x99, 0x00, 0x00).getRGB();
+        final Color brightColor = configuration.getBrightColor();
+        final int pixelOn = new Color(brightColor.getRed(), brightColor.getGreen(), brightColor.getBlue(), 0xFF).getRGB();
+        final int pixelOff = new Color(brightColor.getRed(), brightColor.getGreen(), brightColor.getBlue(), 0x00).getRGB();
 
         // Convert bit array (of bytes) with one bit per pixel to array of int with one int per pixel
         for (int y = 0; y < height; y++) {
@@ -161,24 +153,29 @@ public class ScreenFrame extends JFrame {
         repaint();
     }
 
-    public void initialize(int width, int height) {
+    public void initialize(Configuration configuration) {
+        this.configuration = configuration;
+        addKeyListener(new KeyPad(configuration.getChip8Address()));
+
         setImage(new BufferedImage(1432, 1071, BufferedImage.TYPE_INT_ARGB));
 
         bufferImageRenderSize = new BufferedImage(940, 720, BufferedImage.TYPE_INT_ARGB);
         doubleBufferImage = new BufferedImage(1432, 1071, BufferedImage.TYPE_INT_ARGB);
 
         try {
-            crtImage = ImageIO.read(ClassLoader.getSystemResourceAsStream("nec-jb-1201m.png"));
-            crtGlareImage = ImageIO.read(ClassLoader.getSystemResourceAsStream("nec-jb-1201m_glare.png"));
+            crtImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("nec-jb-1201m.png")));
+            crtGlareImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("nec-jb-1201m_glare.png")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+        final Color darkColor = configuration.getDarkColor();
+
         fadeImage = new BufferedImage(940, 720, BufferedImage.TYPE_INT_ARGB);
         final Graphics fadeGraphics = fadeImage.getGraphics();
-        fadeGraphics.setColor(new Color(0x08, 0x18, 0x00, 0x40));
+        fadeGraphics.setColor(new Color(darkColor.getRed(), darkColor.getGreen(), darkColor.getBlue(), 0x40));
         fadeGraphics.fillRect(0, 0, fadeImage.getWidth() - 1, fadeImage.getHeight() - 1);
-        fadeGraphics.setColor(new Color(0x08, 0x18, 0x00, 0x80));
+        fadeGraphics.setColor(new Color(darkColor.getRed(), darkColor.getGreen(), darkColor.getBlue(), 0x80));
         for (int crtY = 0; crtY < fadeImage.getHeight(); crtY += 3) {
             fadeGraphics.drawLine(0, crtY, fadeImage.getWidth(), crtY);
         }
@@ -210,6 +207,13 @@ public class ScreenFrame extends JFrame {
             }
         });
         thread.start();
+
+        add(scrollPane);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        pack();
+        centerFrame();
+        setVisible(true);
     }
 
     protected void resizeFrame() {

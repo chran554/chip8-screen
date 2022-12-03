@@ -10,10 +10,12 @@ import java.util.Map;
 public class KeyPad implements KeyListener {
 
     private final Map<Integer, Integer> keyCodeToKeyPadCode = new HashMap<>();
+    private final SocketAddress socketAddress;
 
     private int keyState = 0;
 
-    public KeyPad() {
+    public KeyPad(SocketAddress socketAddress) {
+        this.socketAddress = socketAddress;
         keyCodeToKeyPadCode.put(KeyEvent.VK_1, 0x1);
         keyCodeToKeyPadCode.put(KeyEvent.VK_2, 0x2);
         keyCodeToKeyPadCode.put(KeyEvent.VK_3, 0x4);
@@ -49,22 +51,19 @@ public class KeyPad implements KeyListener {
 
     public void announceKeyState() {
         DatagramSocket socket;
-        InetAddress group;
         final byte[] buffer = new byte[2];
 
         buffer[0] = (byte) ((keyState & 0xFF00) >>> 8);
         buffer[1] = (byte) ((keyState & 0x00FF) >>> 0);
 
-        //System.out.println("Sending key state: " +
+        // System.out.println("Sending key state: " +
         //        leftPad(Integer.toBinaryString(buffer[0] & 0x000000FF), "0", 8) + " " +
         //        leftPad(Integer.toBinaryString(buffer[1] & 0x000000FF), "0", 8) + " " +
         //        leftPad(Integer.toBinaryString(keyState), "0", 16));
 
         try {
             socket = new DatagramSocket();
-            group = InetAddress.getByName("230.0.0.0");
-
-            final DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, 9998);
+            final DatagramPacket packet = new DatagramPacket(buffer, 0, buffer.length, socketAddress);
             socket.send(packet);
             socket.close();
         } catch (IOException e) {

@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
-public class UDPDataProcessor implements UDPMulticastMessageListener.UDPPacketDataProcessor {
+public class UdpDataProcessor implements UdpPacketMessageListener.UDPPacketDataProcessor {
 
     @Override
     public void onPacketReceived(byte[] data) {

@@ -2,33 +2,29 @@ package se.cha.chip8.screen;
 
 import java.io.IOException;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Base64;
 
-public class UDPMulticastMessageListener implements Runnable {
+public class UdpPacketMessageListener implements Runnable {
 
     private static final int BYTE_BUFFER_SIZE = 1024; // 1kb read buffer
 
     int port;
     byte[] receiveData;
-    MulticastSocket udpListeningSocket;
+    DatagramSocket udpListeningSocket;
     UDPPacketDataProcessor processor;
     boolean continueListen = true;
 
     /**
      * In IPv4, any address between 224.0.0.0 to 239.255.255.255 can be used as a multicast address.
      */
-    public UDPMulticastMessageListener(UDPPacketDataProcessor listener, String multicastAddress, int localPort) {
-        port = localPort;
+    public UdpPacketMessageListener(UDPPacketDataProcessor listener, int listenerPort) {
+        port = listenerPort;
         processor = listener;
         receiveData = new byte[BYTE_BUFFER_SIZE];
         try {
-            udpListeningSocket = new MulticastSocket(port);
-            final InetAddress group = InetAddress.getByName(multicastAddress);
-            udpListeningSocket.joinGroup(group);
+            udpListeningSocket = new DatagramSocket(port);
         } catch (IOException e) {
-            System.err.println("Multicast socket setup: " + port);
+            System.err.println("Listen socket setup: " + port);
             e.printStackTrace();
         }
     }
