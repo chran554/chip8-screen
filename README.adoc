@@ -5,15 +5,18 @@ A generic UI for CHIP-8 implementations.
 .CHIP-8 UI - Brix game
 image::documentation/images/chip8-screen-brix.png[CHIP-8 UI - Brix game]
 
+.CHIP-8 UI - Pong game
+image::documentation/images/chip8-screen-pong.png[CHIP-8 UI - Pong game]
+
 This is an attempt to create a generic UI for peripherals for CHIP-8 implementations.
-Most CHIP-8 implementations are pretty much straight forward but 
-they all face the problems that occur when it's time to deliver 
+Most CHIP-8 implementations basics are pretty much straight forward,
+but they all face problems that occur when it's time to implement
 
 * a monitor/screen interface
 * sound 
-* key presses (preferably multiple at the same time)
+* key presses (preferably multiple keys at the same time)
 
-This project aim to solve those problems and to have a loose coupled interface (UDP multicast) for communication.
+This project aim to solve those problems by offering a generic UI and to have a loose coupled interface (UDP data packets) for its communication.
 
 == Limitations 
 
@@ -21,15 +24,15 @@ This project aim to solve those problems and to have a loose coupled interface (
 
 == Prerequisites
 
-* Java is needed to (compile and) run the aplication
+* Java is needed to (compile and) run the application.
 
-== Comunication interface
+== Communication interface
 
 To be able to communicate with this CHIP-8 screen you need three things in your CHIP-8 emulator.
 
 1. A way to encode your data in msgpack format. MsgPack is a way to package structured data, much like textual JSON and yaml, but in a binary and much more efficient form.
-2. A way to send UDP mulicast messages (to send screen memory and sound state on/off)
-3. A way to receive UDP multicast messages (to receive key presses)
+2. A way to send UDP data packet messages (to send screen memory and sound state on/off)
+3. A way to receive UDP data packet messages (to receive key presses)
 
 === Encode data in msg pack format
 
@@ -75,7 +78,51 @@ NOTE: Some implementations of MsgPack can use different encoding schemes of "str
 
 === Send UDP
 
+A chip-8 client (implementation) sends chip-8 status messages (as described above) encoded by msgpack to this screen application.
 
+.Chip-8 status message encoding and sending (in general terms for Golang)
+[source, go]
+----
+// Error handling left out from example
+
+screenAddress := "localhost:9999"
+screenConnection, _ := net.Dial("udp", screenAddress)
+
+screenBitBuffer := make([]byte, int(width)*int(height)/8) // bitpacked "video memory"
+// update video memory
+message := Chip8StateMessage{
+    Sound:        state.sound,
+    Keys:         state.keys,
+    Screen:       screenBitBuffer,
+    ScreenWidth:  width,
+    ScreenHeight: height,
+}
+
+serializedMessage, _ := msgpack.Marshal(&message) // import "github.com/vmihailenco/msgpack/v5"
+
+if _, err := screenConnection.Write(serializedMessage); err != nil {
+    fmt.Printf("could not update peripherals screen, key press, and sound state: %s\n", err.Error())
+}
+----
 
 === Receive UDP
 
+A chip-8 client (implementation) receives key pressed status messages from this screen application which track key press events while in focus. Several keys can be pressed at the same time.
+
+.Chip-8 receiving key status messages (in general terms for Golang)
+[source, go]
+----
+	keyPadMaxDatagramSize := 256
+	addr, _ := net.ResolveUDPAddr("udp", ":9998")
+	sock, _ := net.ListenUDP("udp", addr)
+	sock.SetReadBuffer(keyPadMaxDatagramSize)
+
+	buffer := make([]byte, keyPadMaxDatagramSize)
+
+	// Loop forever reading from the socket
+	for {
+		sock.ReadFromUDP(buffer)
+		keyPadState := (uint16(buffer[0]) << 8) | (uint16(buffer[1]) << 0) // Convert byte input data to key pad state
+		chip8.state.pressedKeys = keyPadState
+	}
+----
