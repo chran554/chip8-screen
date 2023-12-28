@@ -18,7 +18,7 @@ public class KeyPad implements KeyListener {
         this.socketAddress = socketAddress;
         keyCodeToKeyPadCode.put(KeyEvent.VK_1, 0x1);
         keyCodeToKeyPadCode.put(KeyEvent.VK_2, 0x2);
-        keyCodeToKeyPadCode.put(KeyEvent.VK_3, 0x4);
+        keyCodeToKeyPadCode.put(KeyEvent.VK_3, 0x3);
         keyCodeToKeyPadCode.put(KeyEvent.VK_4, 0xC);
 
         keyCodeToKeyPadCode.put(KeyEvent.VK_Q, 0x4);

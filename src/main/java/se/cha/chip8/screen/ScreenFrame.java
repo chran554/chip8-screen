@@ -25,6 +25,7 @@ public class ScreenFrame extends JFrame {
     private BufferedImage bufferImage;
     private BufferedImage phosphorImage;
     private BufferedImage fadeImage = null;
+    private BufferedImage activeLightsImage = null;
 
     private int keyState = 0x0000;
     private boolean soundState = false;
@@ -142,8 +143,11 @@ public class ScreenFrame extends JFrame {
 
         doubleBufferImageGraphics.drawImage(phosphorImage, 220 - 40, 200 - 40, null);
         //doubleBufferImageGraphics.drawImage(phosphorGlowImage, 220 - 40, 200 - 40, null);
-        doubleBufferImageGraphics.drawImage(crtImage, 0, 0, null);
         doubleBufferImageGraphics.drawImage(crtGlareImage, 0, 0, null);
+        doubleBufferImageGraphics.drawImage(crtImage, 0, 0, null);
+
+        drawLights(doubleBufferImageGraphics, doubleBufferImage.getWidth(), doubleBufferImage.getHeight());
+
         doubleBufferImageGraphics.dispose();
 
         final Graphics2D g = (Graphics2D) getImage().getGraphics();
@@ -151,6 +155,49 @@ public class ScreenFrame extends JFrame {
         g.dispose();
 
         repaint();
+    }
+
+    private void drawLights(Graphics doubleBufferImageGraphics, int width, int height) {
+        if (soundState) {
+            final int ledX = width - 195;
+            final int ledY = 220;
+            final int ledSize = 35;
+            doubleBufferImageGraphics.drawImage(activeLightsImage, ledX, ledY, ledX + ledSize, ledY + ledSize, ledX, ledY, ledX + ledSize, ledY + ledSize, null);
+        }
+
+        if (keyState > 0) {
+            final int xs = width - 240;
+            final int ys = height - 315;
+            final int kw = 31;
+
+            for (int keyBitIndex = 0; keyBitIndex <= 0xF; keyBitIndex++) {
+                final boolean keyPressed = ((keyState >>> keyBitIndex) & 1) > 0;
+                if (keyPressed) {
+                    int kx = 0;
+                    int ky = 0;
+                    if ((keyBitIndex >= 0x1) && (keyBitIndex <= 0x9)) {
+                        kx = (keyBitIndex - 1) % 3;
+                        ky = (keyBitIndex - 1) / 3;
+                    } else if ((keyBitIndex >= 0xC) && (keyBitIndex <= 0xF)) {
+                        kx = 3;
+                        ky = keyBitIndex - 0xC;
+                    } else if (keyBitIndex == 0xA) {
+                        kx = 0;
+                        ky = 3;
+                    } else if (keyBitIndex == 0x0) {
+                        kx = 1;
+                        ky = 3;
+                    } else if (keyBitIndex == 0xB) {
+                        kx = 2;
+                        ky = 3;
+                    }
+
+                    // doubleBufferImageGraphics.setColor(Color.RED);
+                    // doubleBufferImageGraphics.drawRect(xs + kx * kw, ys + ky * kw, kw, kw);
+                    doubleBufferImageGraphics.drawImage(activeLightsImage, xs + kx * kw, ys + ky * kw, xs + kx * kw + kw, ys + ky * kw + kw, xs + kx * kw, ys + ky * kw, xs + kx * kw + kw, ys + ky * kw + kw, null);
+                }
+            }
+        }
     }
 
     public void initialize(Configuration configuration) {
@@ -163,8 +210,9 @@ public class ScreenFrame extends JFrame {
         doubleBufferImage = new BufferedImage(1432, 1071, BufferedImage.TYPE_INT_ARGB);
 
         try {
-            crtImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("nec-jb-1201m.png")));
-            crtGlareImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("nec-jb-1201m_glare.png")));
+            crtImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("CHIP-8 monitor.png")));
+            crtGlareImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("CHIP-8 monitor - glare.png")));
+            activeLightsImage = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("CHIP-8 monitor - active.png")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

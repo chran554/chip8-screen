@@ -4,15 +4,13 @@ package se.cha;
  * Rigorous Test :-)
  */
 
-import org.junit.Test;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class ImageAlphaTest {
 
-    @Test
+    //@Test
     public void shouldAnswerWithTrue() {
 
         final BufferedImage imageA = new BufferedImage(300, 300, BufferedImage.TYPE_INT_ARGB);
@@ -26,7 +24,7 @@ public class ImageAlphaTest {
         graphicsB.setColor(Color.WHITE);
         graphicsB.fillRect(0, 0, imageB.getWidth(), imageB.getHeight());
         graphicsB.setColor(new Color(0x00, 0xFF, 0x00, 0xFF));
-        graphicsB.fillRect(imageB.getWidth() / 3, imageB.getHeight() / 3, imageB.getWidth() * 2 / 3, imageB.getHeight() *2 / 3);
+        graphicsB.fillRect(imageB.getWidth() / 3, imageB.getHeight() / 3, imageB.getWidth() * 2 / 3, imageB.getHeight() * 2 / 3);
 
         preMultiplyAlpha(imageA);
         preMultiplyAlpha(imageB);
@@ -96,9 +94,9 @@ public class ImageAlphaTest {
 
                     rgbC[pixelIndexB] = // rgbB[pixelIndexB];
                             (Math.round(trunc(ca, 0.0f, 1.0f) * 255) << 24) |
-                            (Math.round(trunc(cr, 0.0f, 1.0f) * 255) << 16) |
-                            (Math.round(trunc(cg, 0.0f, 1.0f) * 255) << 8) |
-                            (Math.round(trunc(cb, 0.0f, 1.0f) * 255) << 0);
+                                    (Math.round(trunc(cr, 0.0f, 1.0f) * 255) << 16) |
+                                    (Math.round(trunc(cg, 0.0f, 1.0f) * 255) << 8) |
+                                    (Math.round(trunc(cb, 0.0f, 1.0f) * 255) << 0);
                 }
             }
         }

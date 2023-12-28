@@ -9,7 +9,7 @@ import java.net.InetAddress;
 
 public class MulticastSenderTest {
 
-    @Test
+    //@Test
     public void testSend() throws InterruptedException {
 
         while (true) {
@@ -38,7 +38,7 @@ public class MulticastSenderTest {
                 throw new RuntimeException(e);
             }
 
-            Thread.sleep(3 * 1000);
+            Thread.sleep(3*1000);
         }
     }
 
