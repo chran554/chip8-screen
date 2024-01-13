@@ -28,15 +28,22 @@ public class Chip8Screen {
     }
 
     private static Configuration parseArguments(String[] args) {
+        // Default configuration
+        Color brightColor = new Color(0x33, 0x99, 0x00, 0xFF);
+        Color darkColor = new Color(0x08, 0x18, 0x00, 0x40);
+        int listenPort = 9999;
+        String chip8AddressText = "localhost:9998";
+
         final Option lpOption = new Option("lp", "listener-port", true,
                 "The listener port where the screen application listen for UDP packets with screen and sound updates." +
-                        " Default, if not specified, is 9999.");
+                        " Default, if not specified, is " + listenPort + ".");
         final Option caOption = new Option("ca", "chip8-address", true,
                 "The UDP address for the CHIP-8 application. The address should be an IPv4 address including port like \"127.0.0.1:9998\"." +
                         " This is the address and port where the CHIP-8 application listen for keypress status messages." +
-                        " Default, if not specified, is \"localhost:9998\".");
+                        " Default, if not specified, is \"" + chip8AddressText + "\".");
         final Option cOption = new Option("c", "color", true,
-                "The RGB hex color for the bright (lit) color on the monochrome screen. Format for the RGB color value is \"#RRGGBB\". Default value is \"#\"");
+                "The RGB hex color for the bright (lit) color on the monochrome screen. Format for the RGB color value is \"#RRGGBB\"." +
+                        " Default value is \"#" + String.format("%06X", 0x00FFFFFF & brightColor.getRGB()) + "\"");
         final Option hOption = new Option("h", "help", false,
                 "Show this help");
 
@@ -54,7 +61,6 @@ public class Chip8Screen {
             throw new RuntimeException(e);
         }
 
-        int listenPort = 9999;
         final String lpValue = cmd.getOptionValue(lpOption, Integer.toString(listenPort));
         try {
             listenPort = Integer.parseInt(lpValue);
@@ -64,7 +70,6 @@ public class Chip8Screen {
             System.exit(1);
         }
 
-        String chip8AddressText = "localhost:9998";
         SocketAddress chip8SocketAddress = null;
         try {
             chip8AddressText = cmd.getOptionValue(caOption, chip8AddressText);
@@ -74,9 +79,6 @@ public class Chip8Screen {
             printCommandHelp(options);
             System.exit(1);
         }
-
-        Color brightColor = new Color(0x33, 0x99, 0x00, 0xFF);
-        Color darkColor = new Color(0x08, 0x18, 0x00, 0x40);
 
         final String cValue = cmd.getOptionValue(cOption);
         try {

@@ -79,7 +79,6 @@ public class KeyPad implements KeyListener {
         return text;
     }
 
-
     @Override
     public void keyTyped(KeyEvent e) {
         // Nothing by intention
