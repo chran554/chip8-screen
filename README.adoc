@@ -88,24 +88,25 @@ java -jar target/chip8-screen.jar
 usage: Chip8Screen [-c <arg>] [-ca <arg>] [-h] [-lp <arg>]
 
 -c,--color <arg>            The RGB hex color for the bright (lit) color
-on the monochrome screen. Format for the RGB
-color value is "#RRGGBB". Default value is
-"#"
+                             on the monochrome screen. Format for the RGB
+                             color value is "#RRGGBB". Default value is
+                             "#339900"
 
 -ca,--chip8-address <arg>   The UDP address for the CHIP-8 application.
-The address should be an IPv4 address
-including port like "127.0.0.1:9998". This is
-the address and port where the CHIP-8
-application listen for keypress status
-messages. Default, if not specified, is
-"localhost:9998".
+                             The address should be an IPv4 address
+                             including port like "127.0.0.1:9998". This is
+                             the address and port where the CHIP-8
+                             application listen for keypress status
+                             messages. Default, if not specified, is
+                             "localhost:9998".
 
--h,--help                   Show this help
+ -h,--help                   Show this help
 
--lp,--listener-port <arg>   The listener port where the screen
-application listen for UDP packets with
-screen and sound updates. Default, if not
-specified, is 9999.
+ -lp,--listener-port <arg>   The listener port where the screen
+                             application listen for UDP packets with
+                             screen and sound updates. Default, if not
+                             specified, is 9999.
+
 
 ----
 
